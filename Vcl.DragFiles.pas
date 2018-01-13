@@ -67,8 +67,6 @@ uses
   Vcl.Controls;
 
 type
-  HDROP = THandle;
-
   TDropEvent = procedure(Sender: TObject; WinControl: TWinControl) of object;
 
   TDropFiles = class(TComponent)
@@ -90,7 +88,7 @@ type
     function GetCount: Integer; inline;
     function GetStrings: TStrings; inline;
   public
-    constructor Create(AOwner: TComponent; DropEvent: TDropEvent = nil); reintroduce;// overload;
+    constructor Create(AOwner: TComponent; DropEvent: TDropEvent = nil); reintroduce;
     destructor Destroy; override;
     procedure Clear;            // Clear paths list.
     procedure Accept; inline;   // Accept drag files.
@@ -254,13 +252,9 @@ begin
   if Assigned(AOwner) then
   begin
     if AOwner is TWinControl then
-    begin
-      Hook(TWinControl(AOwner));
-    end
+      Hook(TWinControl(AOwner))
     else
-    begin
       raise Exception.Create(_NotWinControl);
-    end;
   end
   else
   begin
@@ -329,14 +323,11 @@ procedure TDropFiles.SetWinControl(Value: TWinControl);
 begin
   if Assigned(FOwner) then
     raise Exception.Create(_CannotChangeControl)
-  else
+  else if Value <> FWinControl then
   begin
-    if Value <> FWinControl then
-    begin
-      Unhook;
-      FEnabled := False;
-      Hook(Value);
-    end;
+    Unhook;
+    FEnabled := False;
+    Hook(Value);
   end;
 end;
 
