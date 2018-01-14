@@ -23,10 +23,11 @@
 //                                                                        //
 // 歷程：                                                                 //
 //   2018年01月12日 GetDropFile、GetDropFiles、TDropFiles 功能            //
+//   2018年01月14日 GetDropFile 修正未取得路徑時字串回傳值維持未清空      //
 //                                                                        //
 // 其他：                                                                 //
 //                                                                        //
-// 最後變更日期：2018年01月12日                                           //
+// 最後變更日期：2018年01月14日                                           //
 //                                                                        //
 //########################################################################//
 
@@ -52,10 +53,11 @@
 //
 // History:
 //   Jan 12, 2018 GetDropFile, GetDropFiles and TDropFiles feature.
+//   Jan 14, 2018 GetDropFile Fix return string not empty when not get an dropped file.
 //
 // Tested in Delphi 10 Seattle.
 //
-// Last modified date: Jan 12, 2018.
+// Last modified date: Jan 14, 2018.
 
 unit Vcl.DragFiles;
 
@@ -132,13 +134,11 @@ var
 begin
   Len := Length(Str);
   if Len > 1 then
-  begin
     if (Str[1] = '"') and (Str[Len] = '"') then
       if Len = 2 then
         Str := ''
       else
         Str := Copy(Str, 2, Len - 2);
-  end;
 end;
 
 //
@@ -151,14 +151,17 @@ var
   I: Integer;
 begin
   try
-    I := DragQueryFile(FileMsg.Drop, $FFFFFFFF, nil, 0); // Get files Number.
-    if I <> 1 then
-      Exit;
-    I := DragQueryFile(FileMsg.Drop, 0, nil, 0); // Length of file name.
-    if I <= 0 then
-      Exit;
-    SetLength(Result, I); // Set capacity of string memory.
-    DragQueryFile(FileMsg.Drop, 0, PChar(Result), I + 1); // Copy file name.
+    if DragQueryFile(FileMsg.Drop, $FFFFFFFF, nil, 0) = 1 then  // Need one number of file.
+    begin
+      I := DragQueryFile(FileMsg.Drop, 0, nil, 0); // Length of file name.
+      if I > 0 then
+      begin
+        WideCharLenToStrVar(nil, I, Result); // Set capacity of string memory.
+        DragQueryFile(FileMsg.Drop, 0, PChar(Result), I + 1); // Copy file name.
+        Exit;
+      end;
+    end;
+    WideCharLenToStrVar(nil, 0, Result);
   finally
     DragFinish(FileMsg.Drop); // Releases memory that the system allocated.
   end;
