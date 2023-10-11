@@ -1,5 +1,7 @@
 # others_vcl
 
+[Instructions - GitHub wiki](https://github.com/ps147258/others_vcl/wiki)
+
 Example:
 * Vcl.ComCtrlsEx
 
